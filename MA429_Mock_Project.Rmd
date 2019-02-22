@@ -18,7 +18,7 @@ train <- read.table("http://mlr.cs.umass.edu/ml/machine-learning-databases/adult
 
 
 ```{r}
-
+#Write some codes here
 ```
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
