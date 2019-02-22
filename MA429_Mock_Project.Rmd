@@ -1,11 +1,7 @@
 ---
 title: "MA429 MOCK PROJECT"
-output: html_notebook
+output: MA429_html_notebook
 ---
-
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
 
 ```{r}
 test <- read.table("http://mlr.cs.umass.edu/ml/machine-learning-databases/adult/adult.test", skip=1, 
