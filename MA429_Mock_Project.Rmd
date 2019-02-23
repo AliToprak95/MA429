@@ -19,13 +19,24 @@ train <- read.table("http://mlr.cs.umass.edu/ml/machine-learning-databases/adult
 
 ```{r}
 censusdata <- rbind(train, test)
+levels(censusdata$Income.level) <- c(0,1,0,1)
 str(censusdata)
 summary(censusdata)
 ```
 
 
 ```{r}
-for()
+library(purrr)
+library(tidyr)
+library(ggplot2)
+
+censusdata %>%
+  keep(is.numeric) %>% 
+  gather() %>% 
+  ggplot(aes(value)) +
+  facet_wrap(~ key, scales = "free") +
+  geom_histogram()
+
 sapply(censusdata, class)
 ```
 
