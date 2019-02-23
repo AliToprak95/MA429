@@ -41,6 +41,31 @@ sapply(censusdata, class)
 ```
 
 
+```{r}
+#Age
+attach(censusdata)
+hist(Age,breaks=seq(min(Age),max(Age),by=1))
+boxplot(Age)
+install.packages("outliers")
+library(outliers)
+chisq.out.test(Age,variance = var(Age),opposite = TRUE)
+chisq.out.test(Age,variance = var(Age),opposite = FALSE)
+qqnorm(Age, main = "Normal QQ Plot - ylarge")
+qqline(Age, col = "red")
+```
+
+```{r}
+outlier_values <- boxplot.stats(Age)$out
+boxplot(Age, main="Age", boxwex=0.1)
+mtext(paste("Outliers: ", paste(outlier_values, collapse=", ")), cex=0.6)
+qnt <- quantile(Age, probs=c(.25, .75), na.rm = T)
+caps <- quantile(Age, probs=c(.05, .95), na.rm = T)
+H <- 1.5 * IQR(Age, na.rm = T)
+censusdata[, censusdata$Age < (qnt[1] - H)]$Age <- caps[1]
+censusdata[, censusdata$Age > (qnt[2] + H)]$Age <- caps[2]
+boxplot(censusdata$Age)
+```
+
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 
 When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
