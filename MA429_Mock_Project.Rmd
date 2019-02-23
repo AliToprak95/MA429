@@ -18,8 +18,17 @@ train <- read.table("http://mlr.cs.umass.edu/ml/machine-learning-databases/adult
 
 
 ```{r}
-#Write some codes here
+censusdata <- rbind(train, test)
+str(censusdata)
+summary(censusdata)
 ```
+
+
+```{r}
+for()
+sapply(censusdata, class)
+```
+
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 
