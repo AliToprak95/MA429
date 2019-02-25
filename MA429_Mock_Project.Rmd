@@ -22,6 +22,8 @@ censusdata <- rbind(train, test)
 levels(censusdata$Income.level) <- c(0,1,0,1)
 str(censusdata)
 summary(censusdata)
+narow <- which(rowSums(is.na(censusdata))>0) 
+censusnona <- censusdata[-narow,]
 ```
 
 
