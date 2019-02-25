@@ -63,8 +63,10 @@ mtext(paste("Outliers: ", paste(outlier_values, collapse=", ")), cex=0.6)
 qnt <- quantile(Age, probs=c(.25, .75), na.rm = T)
 caps <- quantile(Age, probs=c(.05, .95), na.rm = T)
 H <- 1.5 * IQR(Age, na.rm = T)
-censusdata[, censusdata$Age < (qnt[1] - H)]$Age <- caps[1]
-censusdata[, censusdata$Age > (qnt[2] + H)]$Age <- caps[2]
+#censusdata[, censusdata$Age < (qnt[1] - H)]$Age <- caps[1]
+#censusdata[, censusdata$Age > (qnt[2] + H)]$Age <- caps[2]
+censusdata[which(censusdata$Age < (qnt[1] - H)),1] <- caps[1]
+censusdata[which(censusdata$Age > (qnt[2] + H)),1] <- caps[2]
 boxplot(censusdata$Age)
 ```
 
