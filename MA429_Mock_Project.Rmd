@@ -4,6 +4,7 @@ output: MA429_html_notebook
 ---
 
 ```{r}
+#Download the data from UCI Machine Learning Repository
 test <- read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.test", skip=1, 
                    sep=",", header = FALSE,
                    col.names=c("Age", "Workclass", "Fnlwgt","Education","Education-num","Marital-status",
@@ -20,12 +21,19 @@ train <- read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/a
 
 
 ```{r}
+#Create the whole dataset
 censusdata <- rbind(train, test)
+rm(train,test)
+
+#Number of missing variables for each attribute
+missingnumber <- function(col){sum(is.na(col))}
+missings <- sapply(censusdata, missingnumber)
+
 levels(censusdata$Income.level) <- c(0,1,0,1)
 str(censusdata)
 summary(censusdata)
 narow <- which(rowSums(is.na(censusdata))>0) 
-censusnona <- censusdata[-narow,]
+censusna <- censusdata[narow,]
 ```
 
 
