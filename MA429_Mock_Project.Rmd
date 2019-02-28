@@ -80,6 +80,19 @@ censusdata[which(censusdata$Age > (qnt[2] + H)),1] <- caps[2]
 boxplot(censusdata$Age)
 ```
 
+# Plot the density of numeric variables with respect to the income level
+```{r}
+library(sm)
+plotdata <- censusdata[,1:14]
+income.f <- factor(censusdata$Income.level, labels = c("<= 50K", "> 50K"))
+Plot <- function(col){
+  sm.density.compare(col,group=censusdata$Income.level)
+  colfill <- c(2:(2+length(levels(income.f))))
+  legend("topright", levels(income.f), fill=colfill)
+}
+sapply(numericdata, Plot)
+```
+
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 
 When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
