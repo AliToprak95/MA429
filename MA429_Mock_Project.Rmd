@@ -35,6 +35,12 @@ summary(censusdata)
 narow <- which(rowSums(is.na(censusdata))>0) 
 censusna <- censusdata[narow,]
 ```
+```{r}
+attach(censusdata)
+
+g <- ggplot(censusdata, aes(x=Race,fill=Income.level))
+g + geom_bar(stat = "count") 
+```
 
 
 ```{r}
