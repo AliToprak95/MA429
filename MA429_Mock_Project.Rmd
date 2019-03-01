@@ -85,6 +85,24 @@ censusdata[which(censusdata$Age < (qnt[1] - H)),1] <- caps[1]
 censusdata[which(censusdata$Age > (qnt[2] + H)),1] <- caps[2]
 boxplot(censusdata$Age)
 ```
+# Find outliers by boxplot
+```{r}
+outlier_boxplot <- function(col){
+outlier_values <- boxplot.stats(col)$out
+length(outlier_values)
+}
+sapply(numericdata, outlier_boxplot)
+```
+# Find outliers by quantile
+```{r}
+outlier_qnt <- function(col){
+qnt <- quantile(col, probs=c(.25, .75), na.rm = T)
+caps <- quantile(col, probs=c(.05, .95), na.rm = T)
+H <- 1.5 * IQR(col, na.rm = T)
+length(which(col<(qnt[1] - H))) + length(which(col>(qnt[2] + H)))
+}
+sapply(numericdata,outlier_qnt)
+```
 
 # Plot the density of numeric variables with respect to the income level
 ```{r}
