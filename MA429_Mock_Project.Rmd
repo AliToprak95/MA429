@@ -15,7 +15,7 @@ train <- read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/a
                     col.names=c("Age", "Workclass", "Fnlwgt","Education","Education-num","Marital-status",
                                 "Occupation","Relationship","Race","Sex",
                                 "Capital-gain","Capital-loss","Hours-per-week","Native-country","Income-level"), na.strings = " ?")
-
+richard
 
 ```
 
