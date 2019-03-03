@@ -15,7 +15,7 @@ train <- read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/a
                     col.names=c("Age", "Workclass", "Fnlwgt","Education","Education-num","Marital-status",
                                 "Occupation","Relationship","Race","Sex",
                                 "Capital-gain","Capital-loss","Hours-per-week","Native-country","Income-level"), na.strings = " ?")
-richard
+
 
 ```
 
@@ -28,18 +28,32 @@ rm(train,test)
 #Number of missing variables for each attribute
 missingnumber <- function(col){sum(is.na(col))}
 missings <- sapply(censusdata, missingnumber)
+missings
+
 
 levels(censusdata$Income.level) <- c(0,1,0,1)
 str(censusdata)
 summary(censusdata)
 narow <- which(rowSums(is.na(censusdata))>0) 
-censusna <- censusdata[narow,]
-```
-```{r}
-attach(censusdata)
+length(narow)
 
-g <- ggplot(censusdata, aes(x=Race,fill=Income.level))
-g + geom_bar(stat = "count") 
+```
+
+```{r}
+library(ggplot2)
+theme_set(theme_classic())
+
+Raceplot <- ggplot(censusdata, aes(x=Race, y=(..count..)/sum(..count..), fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
+
+
+
+
+Ageplot <- ggplot(censusdata, aes(x=Age,fill=Income.level)) + geom_histogram(stat = "count") + theme(text = element_text(size=20))
+library(ggpubr)
+figure <- ggarrange(Raceplot,Ageplot,
+                    labels = c("Race", "Age"),
+                    ncol = 2)
+
 ```
 
 
