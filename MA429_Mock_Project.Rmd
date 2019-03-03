@@ -101,7 +101,7 @@ boxplot(censusdata$Age)
 ```
 # Find outliers by boxplot
 ```{r}
-numericdata <- censusdata[,sapply(censusdata, is.numeric)]
+numericdata <- censusdata[,sapply(census_complete, is.numeric)]
 outlier_boxplot <- function(col){
 outlier_values <- boxplot.stats(col)$out
 length(outlier_values)
@@ -122,10 +122,10 @@ sapply(numericdata,outlier_qnt)
 # Plot the density of numeric variables with respect to the income level
 ```{r}
 library(sm)
-plotdata <- censusdata[,1:14]
-income.f <- factor(censusdata$Income.level, labels = c("<= 50K", "> 50K"))
+plotdata <- census_complete[,1:14]
+income.f <- factor(census_complete$Income.level, labels = c("<= 50K", "> 50K"))
 Plot <- function(col){
-  sm.density.compare(col,group=censusdata$Income.level)
+  sm.density.compare(col,group=census_complete$Income.level)
   colfill <- c(2:(2+length(levels(income.f))))
   legend("topright", levels(income.f), fill=colfill)
 }
@@ -134,14 +134,14 @@ sapply(numericdata, Plot)
 
 ```{r}
 library(scorecard)
-bins = woebin(censusdata, y="Income.level", positive = "1" )
+bins = woebin(census_complete, y="Income.level", positive = "1" )
 bins
 ```
 
 #Prepare the final dataset
 ```{r}
 # no Fnlwgt, Education, Capital Loss, Native country
-censusbin <- censusdata
+censusbin <- census_complete
 # Age data to woe
 for (i in censusbin$Age) {
   if(i < 22) censusbin[which(censusbin$Age == i), 1] <- -4.9598526
