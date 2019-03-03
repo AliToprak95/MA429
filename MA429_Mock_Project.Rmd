@@ -101,6 +101,7 @@ boxplot(censusdata$Age)
 ```
 # Find outliers by boxplot
 ```{r}
+numericdata <- censusdata[,sapply(censusdata, is.numeric)]
 outlier_boxplot <- function(col){
 outlier_values <- boxplot.stats(col)$out
 length(outlier_values)
