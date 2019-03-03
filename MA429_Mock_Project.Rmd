@@ -131,6 +131,67 @@ Plot <- function(col){
 sapply(numericdata, Plot)
 ```
 
+```{r}
+library(scorecard)
+bins = woebin(censusdata, y="Income.level", positive = "1" )
+bins
+```
+
+#Prepare the final dataset
+```{r}
+# no Fnlwgt, Education, Capital Loss, Native country
+censusbin <- censusdata
+# Age data to woe
+for (i in censusbin$Age) {
+  if(i < 22) censusbin[which(censusbin$Age == i), 1] <- -4.9598526
+  else if(i >= 22 & i < 28) censusbin[which(censusbin$Age == i), 1] <- -1.8199929
+  else if(i >= 28 & i < 36) censusbin[which(censusbin$Age == i), 1] <- -0.1803384
+  else censusbin[which(censusbin$Age == i), 1] <- 0.5066784
+}
+
+# Workclass data to woe
+levels(censusbin$Workclass) <- c(0.3787722,0.3787722,0.4313100,-0.1689937,0.4313100,0.4313100,0.4313100,0.4313100)
+
+# Education.num to woe
+for (i in censusbin$Education.num) {
+  if(i < 9) censusbin[which(censusbin$Education.num == i), 5] <- -1.6466314
+  else if(i >= 9 & i < 13) censusbin[which(censusbin$Education.num == i), 5] <- -0.3491833
+  else if(i >= 13 & i < 14) censusbin[which(censusbin$Education.num == i), 5] <- 0.7868101
+  else censusbin[which(censusbin$Education.num == i), 5] <- 1.6011435
+}
+
+# Marital Status to woe
+levels(censusbin$Marital.status)
+levels(censusbin$Marital.status) <- c(-1.0432437,0.9264545,0.9264545,-1.8377340,-1.8377340,-1.3074208,-1.3074208)
+
+# Occupation to woe
+levels(censusbin$Occupation) <- c(-0.3876911,-0.3876911,-0.3876911,1.0265102,-1.0493693,-1.0493693,-1.0493693,-2.0814568,-2.0814568,0.9097133,0.0742908,0.0742908,0.0742908,0.0742908)
+
+# Relationship to woe
+levels(censusbin$Relationship) <- c(0.9326443,-1.0332987,-2.8108997,-2.8108997,-0.3295475,-0.3295475)
+
+# Race to woe
+levels(censusbin$Race) <- c(-0.55998280,-0.55998280,-0.55998280,-0.55998280,0.07646586)
+
+# Sex to woe 
+levels(censusbin$Sex)<- c(-0.9446077,0.3216005)
+
+# Capital gain to woe
+for (i in censusbin$Capital.gain) {
+  if(i < 4000) censusbin[which(censusbin$Capital.gain == i), 11] <- -0.2088651
+  else censusbin[which(censusbin$Capital.gain == i), 11] <- 2.6809686
+}
+
+# Hours per week to woe
+for (i in censusbin$Hours.per.week) {
+  if(i < 35) censusbin[which(censusbin$Hours.per.week == i), 13] <- -1.5001688
+  else if(i >= 35 & i < 42) censusbin[which(censusbin$Hours.per.week == i), 13] <- -0.2069379
+  else if(i >= 42 & i < 50) censusbin[which(censusbin$Hours.per.week == i), 13] <- 0.5038628
+  else censusbin[which(censusbin$Hours.per.week == i), 13] <- 0.8265737
+}
+
+censusbin <- censusbin[,-c(3,4,12,14)]
+```
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 
 When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
