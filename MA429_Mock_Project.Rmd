@@ -36,7 +36,7 @@ str(censusdata)
 summary(censusdata)
 narow <- which(rowSums(is.na(censusdata))>0) 
 length(narow)
-
+census_complete <- censusdata[-narow,]
 ```
 
 ```{r}
