@@ -21,38 +21,47 @@ train <- read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/a
 
 
 ```{r}
-#Create the whole dataset
-censusdata <- rbind(train, test)
-rm(train,test)
-
 #Number of missing variables for each attribute
 missingnumber <- function(col){sum(is.na(col))}
-missings <- sapply(censusdata, missingnumber)
+missings <- sapply(train, missingnumber)
 missings
 
 
-levels(censusdata$Income.level) <- c(0,1,0,1)
-str(censusdata)
-summary(censusdata)
-narow <- which(rowSums(is.na(censusdata))>0) 
-length(narow)
-census_complete <- censusdata[-narow,]
+levels(train$Income.level) <- c(0,1)
+levels(test$Income.level) <- c(0,1)
+#Structure of train data
+str(train)
+#Summary of train data
+summary(train)
+#Number of observations in training data has missing values
+length(which(rowSums(is.na(train))>0))
+
 ```
 
 ```{r}
 library(ggplot2)
 theme_set(theme_classic())
 
-Raceplot <- ggplot(censusdata, aes(x=Race, y=(..count..)/sum(..count..), fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
+#Plotting for Factor Variables
+Workclassplot <- ggplot(train, aes(x=Workclass, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
+Educationplot <- ggplot(train, aes(x=Education, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
+Martial.statusplot <- ggplot(train, aes(x=Martial.status, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
+Occupationplot <- ggplot(train, aes(x=Occupation, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
+Relationshipplot <- ggplot(train, aes(x=Relationship, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
+Raceplot <- ggplot(train, aes(x=Race, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
+Sexplot <- ggplot(train, aes(x=Sex, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
+Native.countryplot <- ggplot(train, aes(x=Native.country, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
 
 
 
 
-Ageplot <- ggplot(censusdata, aes(x=Age,fill=Income.level)) + geom_histogram(stat = "count") + theme(text = element_text(size=20))
+
+
+Ageplot <- ggplot(train, aes(x=Age,fill=Income.level)) + geom_histogram(stat = "count") + theme(text = element_text(size=20))
 library(ggpubr)
-figure <- ggarrange(Raceplot,Ageplot,
-                    labels = c("Race", "Age"),
-                    ncol = 2)
+#figure <- ggarrange(Raceplot,Ageplot,
+ #                   labels = c("Race", "Age"),
+  #                  ncol = 2)
 
 ```
 
@@ -140,48 +149,7 @@ bins
 
 #Prepare the final dataset
 ```{r}
-# no Fnlwgt, Education, Capital Loss, Native country
-censusbin <- census_complete
-# Age data to woe
-for (i in censusbin$Age) {
-  if(i < 22) censusbin[which(censusbin$Age == i), 1] <- -4.9598232
-  else if(i >= 22 & i < 28) censusbin[which(censusbin$Age == i), 1] <- -1.8199635
-  else if(i >= 28 & i < 36) censusbin[which(censusbin$Age == i), 1] <- -0.1803090
-  else censusbin[which(censusbin$Age == i), 1] <- 0.5066451
-}
-# Workclass data to woe
-levels(censusbin$Workclass) <- c(0.3788016,0.3788016,0.4311360,-0.1689643,0.4311360,0.4311360,0.4311360,0.4311360)
-# Education.num to woe
-for (i in censusbin$Education.num) {
-  if(i < 9) censusbin[which(censusbin$Education.num == i), 5] <- -1.6466020
-  else if(i >= 9 & i < 13) censusbin[which(censusbin$Education.num == i), 5] <- -0.3491539
-  else if(i >= 13 & i < 14) censusbin[which(censusbin$Education.num == i), 5] <- 0.7866118
-  else censusbin[which(censusbin$Education.num == i), 5] <- 1.6011729
-}
-# Marital Status to woe
-levels(censusbin$Marital.status)
-levels(censusbin$Marital.status) <- c(-1.0432143,0.9264839,0.9264839,-1.8377741,-1.8377741,-1.3073914,-1.3073914)
-# Occupation to woe
-levels(censusbin$Occupation) <- c(-0.3877675,-0.3877675,-0.3877675,1.0265396,-1.0493399,-1.0493399,-1.0493399,-2.0814274,-2.0814274,0.9097427,0.0743202,0.0743202,0.0743202,0.0743202)
-# Relationship to woe
-levels(censusbin$Relationship) <- c(0.9326737,-1.0333648, -2.8108703, -2.8108703,-0.3295181,-0.3295181)
-# Race to woe
-levels(censusbin$Race) <- c(-0.55995340,-0.55995340,-0.55995340,-0.55995340,0.07646041)
-# Sex to woe 
-levels(censusbin$Sex)<- c(-0.9445783,0.3215822)
-# Capital gain to woe
-for (i in censusbin$Capital.gain) {
-  if(i < 4000) censusbin[which(censusbin$Capital.gain == i), 11] <- -0.2088655
-  else censusbin[which(censusbin$Capital.gain == i), 11] <- 2.6809980
-}
-# Hours per week to woe
-for (i in censusbin$Hours.per.week) {
-  if(i < 35) censusbin[which(censusbin$Hours.per.week == i), 13] <- -1.5001394
-  else if(i >= 35 & i < 42) censusbin[which(censusbin$Hours.per.week == i), 13] <- -0.2069603
-  else if(i >= 42 & i < 50) censusbin[which(censusbin$Hours.per.week == i), 13] <- 0.5038922
-  else censusbin[which(censusbin$Hours.per.week == i), 13] <- 0.8266031
-}
-censusbin <- censusbin[,-c(3,4,12,14)]
+
 ```
 # converting the data
 ```{r}
