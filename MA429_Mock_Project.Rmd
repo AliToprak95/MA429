@@ -71,7 +71,7 @@ library(purrr)
 library(tidyr)
 library(ggplot2)
 
-censusdata %>%
+train %>%
   keep(is.numeric) %>% 
   gather() %>% 
   ggplot(aes(value)) +
@@ -143,18 +143,17 @@ sapply(numericdata, Plot)
 
 ```{r}
 library(scorecard)
-bins = woebin(census_complete, y="Income.level", positive = "1" )
+bins = woebin(train, y="Income.level", positive = "1" )
 bins
 ```
 
 #Prepare the final dataset
 ```{r}
+train_woe <-woebin_ply(dt = train, bins = bins)
+test_woe <-woebin_ply(dt = test, bins = bins)
 
 ```
-# converting the data
-```{r}
-censusdata2 <-woebin_ply(dt = census_complete, bins = bins)
-```
+
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 
