@@ -170,7 +170,15 @@ corrplot(cor(train_woe[,c(-1,-13)]), method="color", col=col(200),
          diag=FALSE 
          )
 ```
-
+# random forest
+```{r}
+library(randomForest)
+rf <- randomForest(Income.level~., data = train_woe)
+rf
+rf_predict <- predict(rf,test_woe)
+rf_confusion_matrix <- table(True_value = test_woe$Income.level, Predict_value = rf_predict)
+rf_confusion_matrix
+```
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 
