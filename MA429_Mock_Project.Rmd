@@ -160,7 +160,6 @@ library(corrplot)
 correlations <- cor(train_woe[,c(-1,-13)])
 correlationplot <- corrplot(correlations,type = "upper")
 correlations
-corrplot
 
 ```
 
