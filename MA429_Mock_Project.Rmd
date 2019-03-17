@@ -155,20 +155,12 @@ test_woe <-woebin_ply(dt = test, bins = bins)
 ```
 #Correlation between the variables
 ```{r}
-install.packages("corrplot")
 library(corrplot)
 
-cor(train_woe[,2:15])
-cor.mtest()
-col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
-corrplot(cor(train_woe[,c(-1,-13)]), method="color", col=col(200),  
-         type="upper", order="hclust", 
-         addCoef.col = "black", # Add coefficient of correlation
-         tl.col="black", tl.srt=45, #Text label color and rotation
-         # Combine with significance
-         # hide correlation coefficient on the principal diagonal
-         diag=FALSE 
-         )
+correlations <- cor(train_woe[,c(-1,-13)])
+correlationplot <- corrplot(correlations,type = "upper")
+correlations
+corrplot
 ```
 # random forest
 ```{r}
