@@ -191,7 +191,7 @@ library(ROCR)
 rf <- randomForest(Income.level~., data = train_woe)
 rf
 rf_predictprob <- predict(rf,test_woe,type = "prob")[,2]
-rf_prediction <- prediction(rf_predict, test_woe$Income.level)
+rf_prediction <- prediction(rf_predictprob, test_woe$Income.level)
 rf_predict <- predict(rf,test_woe)
 rf_confusion_matrix <- table(True_value = test_woe$Income.level, Predict_value = rf_predict)
 rf_confusion_matrix
