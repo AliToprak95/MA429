@@ -199,6 +199,7 @@ rf_confusion_matrix
 rfperf <- performance(rf_prediction,measure = "tpr", x.measure = "fpr")
 rfperfdata <- data.frame(FP = rfperf@x.values[[1]], TP = rfperf@y.values[[1]])
 ```
+<<<<<<< HEAD
 
 #xgboosting
 ```{r}
@@ -222,6 +223,37 @@ xgbperfdata <- data.frame(FP = xgbperf@x.values[[1]], TP = xgbperf@y.values[[1]]
 ```
 
 
+=======
+# Decision Tree
+```{r}
+library(tree)
+tree <- tree(Income.level~.,train_woe)
+summary(tree)
+plot(tree)
+text(tree, pretty = 0)
+tree
+tree_prediction <- predict(tree,test_woe, type = "class")
+tree_cm <- table(test_woe$Income.level, tree_prediction)
+tree_cm
+
+```
+# pruning the tree
+```{r}
+cv_tree <- cv.tree(tree, FUN = prune.misclass)
+par(mfrow = c(1,2))
+plot(cv_tree$size, cv_tree$dev, type = 'b')
+plot(cv_tree$k, cv_tree$dev, type = 'b')
+bestsize <- cv_tree$size[order(cv_tree$dev,decreasing = FALSE)][1]
+message(paste0("best size found to be ", bestsize))
+pruned_tree <- prune.misclass(tree, best = bestsize)
+plot(pruned_tree)
+text(pruned_tree, pretty = 0)
+
+pruned_tree_prediction <- predict(pruned_tree, test_woe, type = "class")
+pruned_tree_cm <- table(test_woe$Income.level,pruned_tree_prediction)
+pruned_tree_cm
+```
+>>>>>>> 08a921bbc9c8a96c1724733f31c41604bf3193e4
 # Performance Matrics
 ```{r}
 getMetrics <- function(true_classes, predicted_class){
