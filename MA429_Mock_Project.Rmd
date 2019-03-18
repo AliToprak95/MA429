@@ -216,6 +216,9 @@ xgb_prediction <- prediction(xgb_predictprob, test_woe$Income.level)
 xgb_confusion_matrix <- table(True_value = test_woe$Income.level, Predict_value = as.numeric(xgb_predictprob > 0.5))
 xgb_confusion_matrix
 xgbperf <- performance(xgb_prediction,measure = "tpr", x.measure = "fpr")
+auc <- performance(xgb_prediction,measure = "auc")
+lift <- performance(xgb_prediction, measure="lift", x.measure="rpp")
+plot(lift, main="Lift Curve", colorize=T)
 xgbperfdata <- data.frame(FP = xgbperf@x.values[[1]], TP = xgbperf@y.values[[1]])
 
 
