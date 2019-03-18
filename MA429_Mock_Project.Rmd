@@ -165,6 +165,9 @@ correlations
 
 #Logistic Regression
 ```{r}
+
+library(ROCR)
+
 lr <- glm(Income.level ~ ., data = train_woe[,-13], family = binomial())
 #Variation Inflation Factor
 vif(lr)
@@ -172,7 +175,7 @@ summary(lr)
 steplr <- step(lr,direction = 'both')
 lr_predict <- predict(steplr,test_woe,type = "response")
 lr_prediction <- prediction(lr_predict, test_woe$Income.level)
-lr_confusion_matrix <- table(True_value = test_woe$Income.level, Predict_value = lr_predict>=0.5)
+lr_confusion_matrix <- table(True_value = test_woe$Income.level, Predict_value = as.numeric(lr_predict > 0.5))
 lr_confusion_matrix
 lrperf <- performance(lr_prediction,measure = "tpr", x.measure = "fpr")
 lrperfdata <- data.frame(FP = lrperf@x.values[[1]], TP = lrperf@y.values[[1]])
@@ -186,7 +189,6 @@ lrperfdata <- data.frame(FP = lrperf@x.values[[1]], TP = lrperf@y.values[[1]])
 # random forest
 ```{r}
 library(randomForest)
-library(ROCR)
 rf <- randomForest(Income.level~., data = train_woe)
 rf
 rf_predictprob <- predict(rf,test_woe,type = "prob")[,2]
@@ -197,6 +199,29 @@ rf_confusion_matrix
 rfperf <- performance(rf_prediction,measure = "tpr", x.measure = "fpr")
 rfperfdata <- data.frame(FP = rfperf@x.values[[1]], TP = rfperf@y.values[[1]])
 ```
+
+#xgboosting
+```{r}
+library(tidyverse)
+library(caret)
+library(xgboost)
+library(doParallel)
+trctrl <- trainControl(method = "cv", number = 5, allowParallel = FALSE)
+xgb <- train(Income.level ~., data = train_woe, method = "xgbTree",
+                trControl=trctrl)
+xgbfinal<-xgb$finalModel
+xgb_predictprob <- predict(xgbfinal,as.matrix(test_woe[,-1]))
+xgb_predictprob <- 1 - xgb_predictprob
+xgb_prediction <- prediction(xgb_predictprob, test_woe$Income.level)
+xgb_confusion_matrix <- table(True_value = test_woe$Income.level, Predict_value = as.numeric(xgb_predictprob > 0.5))
+xgb_confusion_matrix
+xgbperf <- performance(xgb_prediction,measure = "tpr", x.measure = "fpr")
+xgbperfdata <- data.frame(FP = xgbperf@x.values[[1]], TP = xgbperf@y.values[[1]])
+
+
+```
+
+
 # Performance Matrics
 ```{r}
 getMetrics <- function(true_classes, predicted_class){
@@ -221,6 +246,7 @@ theme_set(theme_grey())
 g <- ggplot() + 
   geom_line(data = rfperfdata, aes(x = FP, y = TP, color = 'Random Forest')) + 
   geom_line(data = lrperfdata, aes(x = FP, y = TP, color = 'Logistic Regression')) + 
+  geom_line(data = xgbperfdata, aes(x = FP, y = TP, color = 'XGBoost')) + 
   geom_segment(aes(x = 0, xend = 1, y = 0, yend = 1)) +
   ggtitle('ROC Curve') + 
   labs(x = 'False Positive Rate', y = 'True Positive Rate')
