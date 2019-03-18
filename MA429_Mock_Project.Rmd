@@ -206,7 +206,6 @@ rfperfdata <- data.frame(FP = rfperf@x.values[[1]], TP = rfperf@y.values[[1]])
 library(tidyverse)
 library(caret)
 library(xgboost)
-library(doParallel)
 trctrl <- trainControl(method = "cv", number = 5, allowParallel = FALSE)
 xgb <- train(Income.level ~., data = train_woe, method = "xgbTree",
                 trControl=trctrl)
