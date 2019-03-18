@@ -52,17 +52,21 @@ Raceplot <- ggplot(train, aes(x=Race, fill=Income.level)) + geom_bar(stat = "cou
 Sexplot <- ggplot(train, aes(x=Sex, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
 Native.countryplot <- ggplot(train, aes(x=Native.country, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
 
-
+Native.countryplot
 
 
 
 
 Ageplot <- ggplot(train, aes(x=Age,fill=Income.level)) + geom_histogram(stat = "count") + theme(text = element_text(size=20))
+Capital.lossplot <- ggplot(train, aes(x=Capital.loss,fill=Income.level)) + geom_histogram() + theme(text = element_text(size=20))
+Ageplot
+Capital.lossplot
+Native.countryplot
 library(ggpubr)
-#figure <- ggarrange(Raceplot,Ageplot,
- #                   labels = c("Race", "Age"),
-  #                  ncol = 2)
-
+figure <- ggarrange(Native.countryplot,Capital.lossplot,
+                    labels = c("Native Country", "Capital Loss"),
+                    nrow = 2)
+figure
 ```
 
 
@@ -78,7 +82,13 @@ train %>%
   facet_wrap(~ key, scales = "free") +
   geom_histogram()
 
-sapply(train, class)
+train %>%
+  keep(is.factor) %>% 
+  gather() %>% 
+  ggplot(aes(value)) +
+  facet_wrap(~ key, scales = "free") +
+  geom_bar()+
+  theme(axis.text.x=element_blank())
 ```
 
 
@@ -144,6 +154,25 @@ sapply(numericdata, Plot)
 ```{r}
 library(scorecard)
 bins = woebin(train, y="Income.level", positive = "1" )
+
+a<-rbind(
+  data.frame(bins$Age),
+  data.frame(bins$Workclass),
+  data.frame(bins$Fnlwgt),
+  data.frame(bins$Education),
+  data.frame(bins$Education.num),
+  data.frame(bins$Marital.status),
+  data.frame(bins$Occupation),
+  data.frame(bins$Relationship),
+  data.frame(bins$Race),
+  data.frame(bins$Sex),
+  data.frame(bins$Capital.gain),
+  data.frame(bins$Capital.loss),
+  data.frame(bins$Hours.per.week),
+  data.frame(bins$Native.country)
+)
+library(xlsx)
+write.xlsx(a, "C:/Users/Ali/Desktop/MA429.xlsx") 
 bins
 ```
 
