@@ -241,6 +241,7 @@ library(xgboost)
 trctrl <- trainControl(method = "cv", number = 5, allowParallel = FALSE)
 xgb <- train(Income.level ~., data = train_woe, method = "xgbTree",
                 trControl=trctrl)
+plot(xgb)
 xgbfinal<-xgb$finalModel
 xgb_predictprob <- predict(xgbfinal,as.matrix(test_woe[,-1]))
 xgb_predictprob <- 1 - xgb_predictprob
