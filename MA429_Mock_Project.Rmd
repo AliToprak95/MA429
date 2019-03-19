@@ -194,17 +194,26 @@ correlations
 
 ```
 
+
+#Feature Elimination
+```{r}
+train_woe <- train_woe[,-c("Fnlwgt_woe","Native.country_woe","Capital.loss_woe","Education_woe")]
+test_woe <- test_woe[,-c("Fnlwgt_woe","Native.country_woe","Capital.loss_woe","Education_woe")]
+```
+
+
+
 #Logistic Regression
 ```{r}
 
 library(ROCR)
 colnames(train_woe)
-lr <- glm(Income.level ~ . -Native.country_woe , data = train_woe[,-13], family = binomial())
+lr <- glm(Income.level ~ ., data = train_woe, family = binomial())
 #Variation Inflation Factor
 vif(lr)
 summary(lr)
 steplr <- step(lr,direction = 'both')
-
+vif(steplr)
 lr_predict <- predict(steplr,test_woe,type = "response")
 lr_prediction <- prediction(lr_predict, test_woe$Income.level)
 lr_confusion_matrix <- table(True_value = test_woe$Income.level, Predict_value = as.numeric(lr_predict > 0.5))
@@ -248,6 +257,8 @@ library(xgboost)
 trctrl <- trainControl(method = "cv", number = 5, allowParallel = FALSE)
 xgb <- train(Income.level ~., data = train_woe, method = "xgbTree",
                 trControl=trctrl)
+xgb$results
+xgb$bestTune
 plot(xgb)
 xgbfinal<-xgb$finalModel
 xgb_predictprob <- predict(xgbfinal,as.matrix(test_woe[,-1]))
