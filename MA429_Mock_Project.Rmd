@@ -221,8 +221,15 @@ lrperfdata <- data.frame(FP = lrperf@x.values[[1]], TP = lrperf@y.values[[1]])
 # random forest
 ```{r}
 library(randomForest)
-rf <- randomForest(Income.level~., data = train_woe)
-rf
+library(tidyverse)
+library(caret)
+library(xgboost)
+trctrl <- trainControl(method = "cv", number = 5, allowParallel = FALSE)
+rfcv <- train(Income.level ~., data = train_woe, method = "rf",
+                trControl=trctrl)
+plot(xgb)
+rffinal<-rfcv$finalModel
+rf <- rffinal
 rf_predictprob <- predict(rf,test_woe,type = "prob")[,2]
 rf_prediction <- prediction(rf_predictprob, test_woe$Income.level)
 rf_predict <- predict(rf,test_woe)
