@@ -186,8 +186,10 @@ test_woe <-woebin_ply(dt = test, bins = bins)
 ```{r}
 library(corrplot)
 
-correlations <- cor(train_woe[,c(-1,-13)])
+correlations <- round(cor(train_woe[,c(-1,-13)]),2)
 correlationplot <- corrplot(correlations,type = "upper")
+cordata <- data.frame(correlations)
+write.xlsx(cordata, "C:/Users/Ali/Desktop/MA429.xlsx") 
 correlations
 
 ```
@@ -196,12 +198,13 @@ correlations
 ```{r}
 
 library(ROCR)
-
-lr <- glm(Income.level ~ ., data = train_woe[,-13], family = binomial())
+colnames(train_woe)
+lr <- glm(Income.level ~ . -Native.country_woe , data = train_woe[,-13], family = binomial())
 #Variation Inflation Factor
 vif(lr)
 summary(lr)
 steplr <- step(lr,direction = 'both')
+
 lr_predict <- predict(steplr,test_woe,type = "response")
 lr_prediction <- prediction(lr_predict, test_woe$Income.level)
 lr_confusion_matrix <- table(True_value = test_woe$Income.level, Predict_value = as.numeric(lr_predict > 0.5))
