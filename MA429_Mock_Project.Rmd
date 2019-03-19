@@ -324,7 +324,12 @@ getMetrics <- function(true_classes, predicted_class){
             "recall" = recall))
 }
 ```
-
+```{r}
+list("logistic regression" = getMetrics(test_woe$Income.level,as.numeric(lr_predict > 0.5)))
+list("random forest" = getMetrics(test_woe$Income.level, rf_predict))
+list("boosting" = getMetrics(test_woe$Income.level,as.numeric(xgb_predictprob > 0.5)))
+list("decision tree" = getMetrics(test_woe$Income.level, tree_predict))
+```
 #ROC CURVE PLOTTING
 ```{r}
 theme_set(theme_grey())
