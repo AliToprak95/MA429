@@ -123,25 +123,6 @@ sapply(numericdata,outlier_qnt)
 library(scorecard)
 #Construct the bins
 bins = woebin(train, y="Income.level", positive = "1" )
-
-a<-rbind(
-  data.frame(bins$Age),
-  data.frame(bins$Workclass),
-  data.frame(bins$Fnlwgt),
-  data.frame(bins$Education),
-  data.frame(bins$Education.num),
-  data.frame(bins$Marital.status),
-  data.frame(bins$Occupation),
-  data.frame(bins$Relationship),
-  data.frame(bins$Race),
-  data.frame(bins$Sex),
-  data.frame(bins$Capital.gain),
-  data.frame(bins$Capital.loss),
-  data.frame(bins$Hours.per.week),
-  data.frame(bins$Native.country)
-)
-library(xlsx)
-write.xlsx(a, "C:/Users/Ali/Desktop/MA429.xlsx") 
 #Show the bins, IV, WOE
 bins
 ```
@@ -197,6 +178,8 @@ lr_confusion_matrix
 lrperf <- performance(lr_prediction,measure = "tpr", x.measure = "fpr")
 lrauc <- performance(lr_prediction,measure = "auc")@y.values[[1]]
 sprintf("Logistic Regression AUC: %s", lrauc)
+lrlift <- performance(lr_prediction, measure="lift", x.measure="rpp")
+plot(lrlift, main="Lift Curve", colorize=T)
 lrperfdata <- data.frame(FP = lrperf@x.values[[1]], TP = lrperf@y.values[[1]])
 
 
@@ -233,6 +216,8 @@ rf_confusion_matrix
 rfperf <- performance(rf_prediction,measure = "tpr", x.measure = "fpr")
 rfauc <- performance(rf_prediction,measure = "auc")@y.values[[1]]
 sprintf("Random Forest AUC: %s", rfauc)
+rflift <- performance(rf_prediction, measure="lift", x.measure="rpp")
+plot(rflift, main="Lift Curve", colorize=T)
 rfperfdata <- data.frame(FP = rfperf@x.values[[1]], TP = rfperf@y.values[[1]])
 ```
 
@@ -264,10 +249,9 @@ xgb_confusion_matrix
 xgbperf <- performance(xgb_prediction,measure = "tpr", x.measure = "fpr")
 xgbauc <- performance(xgb_prediction,measure = "auc")@y.values[[1]]
 sprintf("XGBoost AUC: %s", xgbauc)
-lift <- performance(xgb_prediction, measure="lift", x.measure="rpp")
-plot(lift, main="Lift Curve", colorize=T)
+xgblift <- performance(xgb_prediction, measure="lift", x.measure="rpp")
+plot(xgblift, main="Lift Curve", colorize=T)
 xgbperfdata <- data.frame(FP = xgbperf@x.values[[1]], TP = xgbperf@y.values[[1]])
-
 
 ```
 
@@ -293,6 +277,8 @@ tree_cm
 treeperf <- performance(tree_prediction,measure = "tpr", x.measure = "fpr")
 treeauc <- performance(tree_prediction,measure = "auc")@y.values[[1]]
 sprintf("Tree AUC: %s", treeauc)
+treelift <- performance(tree_prediction, measure="lift", x.measure="rpp")
+plot(treelift, main="Lift Curve", colorize=T)
 treeperfdata <- data.frame(FP = treeperf@x.values[[1]], TP = treeperf@y.values[[1]])
 
 ```
