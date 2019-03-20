@@ -212,8 +212,11 @@ library(tidyverse)
 library(caret)
 #Cross validation using caret
 trctrl <- trainControl(method = "cv", number = 5, allowParallel = FALSE)
+start_time <- Sys.time()
 rfcv <- train(Income.level ~., data = train_woe, method = "rf",
                 trControl=trctrl)
+end_time <- Sys.time()
+end_time-start_time
 #Plotting the cross validation
 plot(rfcv)
 #Constructing final model with best parameters
@@ -240,8 +243,11 @@ library(caret)
 library(xgboost)
 #Cross validation using caret
 trctrl <- trainControl(method = "cv", number = 5, allowParallel = FALSE)
+start_time <- Sys.time()
 xgb <- train(Income.level ~., data = train_woe, method = "xgbTree",
                 trControl=trctrl)
+end_time <- Sys.time()
+end_time-start_time
 #Results of cross validation and final model
 xgb$results
 xgb$bestTune
@@ -269,7 +275,10 @@ xgbperfdata <- data.frame(FP = xgbperf@x.values[[1]], TP = xgbperf@y.values[[1]]
 # Decision Tree
 ```{r}
 library(tree)
+start_time <- Sys.time()
 tree <- tree(Income.level~.,train_woe)
+end_time <- Sys.time()
+end_time-start_time
 summary(tree)
 plot(tree)
 text(tree, pretty = 0)
