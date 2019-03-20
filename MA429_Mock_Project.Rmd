@@ -56,15 +56,6 @@ Native.countryplot <- ggplot(train, aes(x=Native.country, fill=Income.level)) + 
 Ageplot <- ggplot(train, aes(x=Age,fill=Income.level)) + geom_histogram(stat = "count") + theme(text = element_text(size=20))
 Capital.lossplot <- ggplot(train, aes(x=Capital.loss,fill=Income.level)) + geom_histogram() + theme(text = element_text(size=20))
 fnlwgtplot <- ggplot(train, aes(x=Fnlwgt,fill=Income.level)) + geom_histogram() + theme(text = element_text(size=20))
-
-Ageplot
-Capital.lossplot
-Native.countryplot
-library(ggpubr)
-figure <- ggarrange(Native.countryplot,Capital.lossplot,
-                    labels = c("Native Country", "Capital Loss"),
-                    nrow = 2)
-figure
 ```
 
 #Visualisation of all numeric and factor variables in one figure for good overview of data
@@ -168,7 +159,6 @@ library(corrplot)
 correlations <- round(cor(train_woe[,c(-1,-13)]),2)
 correlationplot <- corrplot(correlations,type = "upper")
 cordata <- data.frame(correlations)
-write.xlsx(cordata, "C:/Users/Ali/Desktop/MA429.xlsx") 
 correlations
 
 ```
@@ -267,7 +257,7 @@ xgb_confusion_matrix
 #Performance objects
 xgbperf <- performance(xgb_prediction,measure = "tpr", x.measure = "fpr")
 xgbauc <- performance(xgb_prediction,measure = "auc")@y.values[[1]]
-sprintf("XGBoost: %s", xgbauc)
+sprintf("XGBoost AUC: %s", xgbauc)
 lift <- performance(xgb_prediction, measure="lift", x.measure="rpp")
 plot(lift, main="Lift Curve", colorize=T)
 xgbperfdata <- data.frame(FP = xgbperf@x.values[[1]], TP = xgbperf@y.values[[1]])
@@ -284,9 +274,17 @@ summary(tree)
 plot(tree)
 text(tree, pretty = 0)
 tree
-tree_prediction <- predict(tree,test_woe, type = "vector")
-tree_cm <- table(test_woe$Income.level, tree_prediction)
+#Prediction
+tree_predictprob <- predict(tree,test_woe, type = "vector")[,2]
+tree_prediction <- prediction(tree_predictprob, test_woe$Income.level)
+#Confusion Matrix
+tree_cm <- table(test_woe$Income.level, as.numeric(tree_predictprob > 0.5))
 tree_cm
+#Performance objects
+treeperf <- performance(tree_prediction,measure = "tpr", x.measure = "fpr")
+treeauc <- performance(tree_prediction,measure = "auc")@y.values[[1]]
+sprintf("Tree AUC: %s", treeauc)
+treeperfdata <- data.frame(FP = treeperf@x.values[[1]], TP = treeperf@y.values[[1]])
 
 ```
 # Pruning the tree
@@ -301,11 +299,11 @@ pruned_tree <- prune.misclass(tree, best = bestsize)
 plot(pruned_tree)
 text(pruned_tree, pretty = 0)
 
-pruned_tree_prediction <- predict(pruned_tree, test_woe, type = "class")
-pruned_tree_cm <- table(test_woe$Income.level,pruned_tree_prediction)
+pruned_tree_prediction <- predict(pruned_tree, test_woe, type = "vector")[,2]
+pruned_tree_cm <- table(test_woe$Income.level,as.numeric(pruned_tree_prediction>0.5))
 pruned_tree_cm
 ```
->>>>>>> 08a921bbc9c8a96c1724733f31c41604bf3193e4
+
 # Performance Matrics
 ```{r}
 getMetrics <- function(true_classes, predicted_class){
@@ -327,7 +325,7 @@ getMetrics <- function(true_classes, predicted_class){
 list("logistic regression" = getMetrics(test_woe$Income.level,as.numeric(lr_predict > 0.5)))
 list("random forest" = getMetrics(test_woe$Income.level, rf_predict))
 list("boosting" = getMetrics(test_woe$Income.level,as.numeric(xgb_predictprob > 0.5)))
-list("decision tree" = getMetrics(test_woe$Income.level, tree_predict))
+list("decision tree" = getMetrics(test_woe$Income.level, as.numeric(tree_predictprob > 0.5)))
 ```
 #ROC CURVE PLOTTING
 ```{r}
@@ -336,6 +334,7 @@ g <- ggplot() +
   geom_line(data = rfperfdata, aes(x = FP, y = TP, color = 'Random Forest')) + 
   geom_line(data = lrperfdata, aes(x = FP, y = TP, color = 'Logistic Regression')) + 
   geom_line(data = xgbperfdata, aes(x = FP, y = TP, color = 'XGBoost')) + 
+  geom_line(data = treeperfdata, aes(x = FP, y = TP, color = 'Decision Tree')) +
   geom_segment(aes(x = 0, xend = 1, y = 0, yend = 1)) +
   ggtitle('ROC Curve') + 
   labs(x = 'False Positive Rate', y = 'True Positive Rate')
