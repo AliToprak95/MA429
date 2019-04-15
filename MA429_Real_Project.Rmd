@@ -190,7 +190,7 @@ library(caret)
 #Cross validation using caret
 trctrl <- trainControl(method = "cv", number = 5, allowParallel = FALSE)
 start_time <- Sys.time()
-rfcv <- train(Income.level ~., data = train_woe, method = "rf",
+rfcv <- train(Revenue ~., data = train_woe, method = "rf",
                 trControl=trctrl)
 end_time <- Sys.time()
 end_time-start_time
@@ -204,7 +204,7 @@ rf_predictprob <- predict(rf,test_woe,type = "prob")[,2]
 rf_prediction <- prediction(rf_predictprob, test_woe$Income.level)
 rf_predict <- predict(rf,test_woe)
 #Confusion Matrix
-rf_confusion_matrix <- table(True_value = test_woe$Income.level, Predict_value = rf_predict)
+rf_confusion_matrix <- table(True_value = test_woe$Revenue, Predict_value = rf_predict)
 rf_confusion_matrix
 #Performance object 
 rfperf <- performance(rf_prediction,measure = "tpr", x.measure = "fpr")
@@ -223,7 +223,7 @@ library(xgboost)
 #Cross validation using caret
 trctrl <- trainControl(method = "cv", number = 5, allowParallel = FALSE)
 start_time <- Sys.time()
-xgb <- train(Income.level ~., data = train_woe, method = "xgbTree",
+xgb <- train(Revenue ~., data = train_woe, method = "xgbTree",
                 trControl=trctrl)
 end_time <- Sys.time()
 end_time-start_time
@@ -235,9 +235,9 @@ xgbfinal<-xgb$finalModel
 #Prediction of the instances
 xgb_predictprob <- predict(xgbfinal,as.matrix(test_woe[,-1]))
 xgb_predictprob <- 1 - xgb_predictprob
-xgb_prediction <- prediction(xgb_predictprob, test_woe$Income.level)
+xgb_prediction <- prediction(xgb_predictprob, test_woe$Revenue)
 #Confustion matrix
-xgb_confusion_matrix <- table(True_value = test_woe$Income.level, Predict_value = as.numeric(xgb_predictprob > 0.5))
+xgb_confusion_matrix <- table(True_value = test_woe$Revenue, Predict_value = as.numeric(xgb_predictprob > 0.5))
 xgb_confusion_matrix
 #Performance objects
 xgbperf <- performance(xgb_prediction,measure = "tpr", x.measure = "fpr")
@@ -254,7 +254,7 @@ xgbperfdata <- data.frame(FP = xgbperf@x.values[[1]], TP = xgbperf@y.values[[1]]
 ```{r}
 library(tree)
 start_time <- Sys.time()
-tree <- tree(Income.level~.,train_woe)
+tree <- tree(Revenue~.,train_woe)
 end_time <- Sys.time()
 end_time-start_time
 summary(tree)
@@ -265,7 +265,7 @@ tree
 tree_predictprob <- predict(tree,test_woe, type = "vector")[,2]
 tree_prediction <- prediction(tree_predictprob, test_woe$Income.level)
 #Confusion Matrix
-tree_cm <- table(test_woe$Income.level, as.numeric(tree_predictprob > 0.5))
+tree_cm <- table(test_woe$Revenue, as.numeric(tree_predictprob > 0.5))
 tree_cm
 #Performance objects
 treeperf <- performance(tree_prediction,measure = "tpr", x.measure = "fpr")
@@ -289,7 +289,7 @@ plot(pruned_tree)
 text(pruned_tree, pretty = 0)
 
 pruned_tree_prediction <- predict(pruned_tree, test_woe, type = "vector")[,2]
-pruned_tree_cm <- table(test_woe$Income.level,as.numeric(pruned_tree_prediction>0.5))
+pruned_tree_cm <- table(test_woe$Revenue,as.numeric(pruned_tree_prediction>0.5))
 pruned_tree_cm
 ```
 
@@ -309,8 +309,7 @@ getMetrics <- function(true_classes, predicted_class){
             "precision" = precision, 
             "recall" = recall))
 }
-```
-```{r}
+
 list("logistic regression" = getMetrics(test_woe$Revenue,as.numeric(lr_predict > 0.5)))
 list("random forest" = getMetrics(test_woe$Income.level, rf_predict))
 list("boosting" = getMetrics(test_woe$Income.level,as.numeric(xgb_predictprob > 0.5)))
