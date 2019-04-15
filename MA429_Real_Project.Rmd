@@ -201,7 +201,7 @@ rffinal<-rfcv$finalModel
 rf <- rffinal
 #Prediction objects
 rf_predictprob <- predict(rf,test_woe,type = "prob")[,2]
-rf_prediction <- prediction(rf_predictprob, test_woe$Income.level)
+rf_prediction <- prediction(rf_predictprob, test_woe$Revenue)
 rf_predict <- predict(rf,test_woe)
 #Confusion Matrix
 rf_confusion_matrix <- table(True_value = test_woe$Revenue, Predict_value = rf_predict)
@@ -263,7 +263,7 @@ text(tree, pretty = 0)
 tree
 #Prediction
 tree_predictprob <- predict(tree,test_woe, type = "vector")[,2]
-tree_prediction <- prediction(tree_predictprob, test_woe$Income.level)
+tree_prediction <- prediction(tree_predictprob, test_woe$Revenue)
 #Confusion Matrix
 tree_cm <- table(test_woe$Revenue, as.numeric(tree_predictprob > 0.5))
 tree_cm
