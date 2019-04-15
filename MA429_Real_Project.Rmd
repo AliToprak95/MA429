@@ -1,0 +1,343 @@
+---
+title: "MA429 MOCK PROJECT"
+output: MA429_html_notebook
+---
+
+```{r}
+#Download the data from UCI Machine Learning Repository
+test <- read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.test", skip=1, 
+                   sep=",", header = FALSE,
+                   col.names=c("Age", "Workclass", "Fnlwgt","Education","Education-num","Marital-status",
+                               "Occupation","Relationship","Race","Sex",
+                               "Capital-gain","Capital-loss","Hours-per-week","Native-country","Income-level"), na.strings = " ?")
+train <- read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data",
+                    sep=",", header = FALSE,
+                    col.names=c("Age", "Workclass", "Fnlwgt","Education","Education-num","Marital-status",
+                                "Occupation","Relationship","Race","Sex",
+                                "Capital-gain","Capital-loss","Hours-per-week","Native-country","Income-level"), na.strings = " ?")
+
+
+```
+
+
+```{r}
+#Number of missing variables for each attribute
+missingnumber <- function(col){sum(is.na(col))}
+missings <- sapply(train, missingnumber)
+missings
+
+#Changing levels to 0 and 1, 0 means low income level, 1 means high income level
+levels(train$Income.level) <- c(0,1)
+levels(test$Income.level) <- c(0,1)
+
+#Structure of train data
+str(train)
+#Summary of train data
+summary(train)
+#Number of observations in training data has missing values
+length(which(rowSums(is.na(train))>0))
+
+```
+
+```{r}
+library(ggplot2)
+theme_set(theme_classic())
+
+#Plotting for Factor Variables
+Workclassplot <- ggplot(train, aes(x=Workclass, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
+Educationplot <- ggplot(train, aes(x=Education, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
+Martial.statusplot <- ggplot(train, aes(x=Martial.status, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
+Occupationplot <- ggplot(train, aes(x=Occupation, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
+Relationshipplot <- ggplot(train, aes(x=Relationship, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
+Raceplot <- ggplot(train, aes(x=Race, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
+Sexplot <- ggplot(train, aes(x=Sex, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
+Native.countryplot <- ggplot(train, aes(x=Native.country, fill=Income.level)) + geom_bar(stat = "count") + coord_flip() + theme(text = element_text(size=20)) 
+
+Ageplot <- ggplot(train, aes(x=Age,fill=Income.level)) + geom_histogram(stat = "count") + theme(text = element_text(size=20))
+Capital.lossplot <- ggplot(train, aes(x=Capital.loss,fill=Income.level)) + geom_histogram() + theme(text = element_text(size=20))
+fnlwgtplot <- ggplot(train, aes(x=Fnlwgt,fill=Income.level)) + geom_histogram() + theme(text = element_text(size=20))
+```
+
+#Visualisation of all numeric and factor variables in one figure for good overview of data
+```{r}
+library(purrr)
+library(tidyr)
+library(ggplot2)
+
+train %>%
+  keep(is.numeric) %>% 
+  gather() %>% 
+  ggplot(aes(value)) +
+  facet_wrap(~ key, scales = "free") +
+  geom_histogram()
+
+train %>%
+  keep(is.factor) %>% 
+  gather() %>% 
+  ggplot(aes(value)) +
+  facet_wrap(~ key, scales = "free") +
+  geom_bar()+
+  theme(axis.text.x=element_blank())
+```
+
+
+```{r}
+#Age
+attach(censusdata)
+hist(Age,breaks=seq(min(Age),max(Age),by=1))
+boxplot(Age)
+install.packages("outliers")
+library(outliers)
+chisq.out.test(Age,variance = var(Age),opposite = TRUE)
+chisq.out.test(Age,variance = var(Age),opposite = FALSE)
+qqnorm(Age, main = "Normal QQ Plot - ylarge")
+qqline(Age, col = "red")
+```
+
+
+# Find outliers by boxplot
+```{r}
+numericdata <- censusdata[,sapply(census_complete, is.numeric)]
+outlier_boxplot <- function(col){
+outlier_values <- boxplot.stats(col)$out
+length(outlier_values)
+}
+sapply(numericdata, outlier_boxplot)
+```
+
+
+# Find outliers by quantile
+```{r}
+outlier_qnt <- function(col){
+qnt <- quantile(col, probs=c(.25, .75), na.rm = T)
+caps <- quantile(col, probs=c(.05, .95), na.rm = T)
+H <- 1.5 * IQR(col, na.rm = T)
+length(which(col<(qnt[1] - H))) + length(which(col>(qnt[2] + H)))
+}
+sapply(numericdata,outlier_qnt)
+```
+
+
+#Optimal bining in the trainin dataset
+```{r}
+library(scorecard)
+#Construct the bins
+bins = woebin(train, y="Income.level", positive = "1" )
+#Show the bins, IV, WOE
+bins
+```
+
+#Prepare the final dataset
+```{r}
+train_woe <-woebin_ply(dt = train, bins = bins)
+test_woe <-woebin_ply(dt = test, bins = bins)
+
+```
+#Correlation between the variables
+```{r}
+library(corrplot)
+
+correlations <- round(cor(train_woe[,c(-1,-13)]),2)
+correlationplot <- corrplot(correlations,type = "upper")
+cordata <- data.frame(correlations)
+correlations
+
+```
+
+
+#Feature Elimination according to IV, and correleation
+```{r}
+train_woe <- train_woe[,-c("Fnlwgt_woe","Native.country_woe","Capital.loss_woe","Education_woe")]
+test_woe <- test_woe[,-c("Fnlwgt_woe","Native.country_woe","Capital.loss_woe","Education_woe")]
+```
+
+
+
+#Logistic Regression
+```{r}
+
+library(ROCR)
+colnames(train_woe)
+start_time <- Sys.time()
+lr <- glm(Income.level ~ ., data = train_woe, family = binomial())
+end_time <- Sys.time()
+end_time-start_time
+#VIF Check
+vif(lr)
+summary(lr)
+#Stepwise Selection
+steplr <- step(lr,direction = 'both')
+vif(steplr)
+#Prediction
+lr_predict <- predict(steplr,test_woe,type = "response")
+lr_prediction <- prediction(lr_predict, test_woe$Income.level)
+#Confusion Matrix
+lr_confusion_matrix <- table(True_value = test_woe$Income.level, Predict_value = as.numeric(lr_predict > 0.5))
+lr_confusion_matrix
+#Performance object
+lrperf <- performance(lr_prediction,measure = "tpr", x.measure = "fpr")
+lrauc <- performance(lr_prediction,measure = "auc")@y.values[[1]]
+sprintf("Logistic Regression AUC: %s", lrauc)
+lrlift <- performance(lr_prediction, measure="lift", x.measure="rpp")
+plot(lrlift, main="Lift Curve", colorize=T)
+lrperfdata <- data.frame(FP = lrperf@x.values[[1]], TP = lrperf@y.values[[1]])
+
+
+```
+
+
+
+
+# Random forest
+```{r}
+library(randomForest)
+library(tidyverse)
+library(caret)
+#Cross validation using caret
+trctrl <- trainControl(method = "cv", number = 5, allowParallel = FALSE)
+start_time <- Sys.time()
+rfcv <- train(Income.level ~., data = train_woe, method = "rf",
+                trControl=trctrl)
+end_time <- Sys.time()
+end_time-start_time
+#Plotting the cross validation
+plot(rfcv)
+#Constructing final model with best parameters
+rffinal<-rfcv$finalModel
+rf <- rffinal
+#Prediction objects
+rf_predictprob <- predict(rf,test_woe,type = "prob")[,2]
+rf_prediction <- prediction(rf_predictprob, test_woe$Income.level)
+rf_predict <- predict(rf,test_woe)
+#Confusion Matrix
+rf_confusion_matrix <- table(True_value = test_woe$Income.level, Predict_value = rf_predict)
+rf_confusion_matrix
+#Performance object 
+rfperf <- performance(rf_prediction,measure = "tpr", x.measure = "fpr")
+rfauc <- performance(rf_prediction,measure = "auc")@y.values[[1]]
+sprintf("Random Forest AUC: %s", rfauc)
+rflift <- performance(rf_prediction, measure="lift", x.measure="rpp")
+plot(rflift, main="Lift Curve", colorize=T)
+rfperfdata <- data.frame(FP = rfperf@x.values[[1]], TP = rfperf@y.values[[1]])
+```
+
+# XGBoosting
+```{r}
+library(tidyverse)
+library(caret)
+library(xgboost)
+#Cross validation using caret
+trctrl <- trainControl(method = "cv", number = 5, allowParallel = FALSE)
+start_time <- Sys.time()
+xgb <- train(Income.level ~., data = train_woe, method = "xgbTree",
+                trControl=trctrl)
+end_time <- Sys.time()
+end_time-start_time
+#Results of cross validation and final model
+xgb$results
+xgb$bestTune
+plot(xgb)
+xgbfinal<-xgb$finalModel
+#Prediction of the instances
+xgb_predictprob <- predict(xgbfinal,as.matrix(test_woe[,-1]))
+xgb_predictprob <- 1 - xgb_predictprob
+xgb_prediction <- prediction(xgb_predictprob, test_woe$Income.level)
+#Confustion matrix
+xgb_confusion_matrix <- table(True_value = test_woe$Income.level, Predict_value = as.numeric(xgb_predictprob > 0.5))
+xgb_confusion_matrix
+#Performance objects
+xgbperf <- performance(xgb_prediction,measure = "tpr", x.measure = "fpr")
+xgbauc <- performance(xgb_prediction,measure = "auc")@y.values[[1]]
+sprintf("XGBoost AUC: %s", xgbauc)
+xgblift <- performance(xgb_prediction, measure="lift", x.measure="rpp")
+plot(xgblift, main="Lift Curve", colorize=T)
+xgbperfdata <- data.frame(FP = xgbperf@x.values[[1]], TP = xgbperf@y.values[[1]])
+
+```
+
+
+# Decision Tree
+```{r}
+library(tree)
+start_time <- Sys.time()
+tree <- tree(Income.level~.,train_woe)
+end_time <- Sys.time()
+end_time-start_time
+summary(tree)
+plot(tree)
+text(tree, pretty = 0)
+tree
+#Prediction
+tree_predictprob <- predict(tree,test_woe, type = "vector")[,2]
+tree_prediction <- prediction(tree_predictprob, test_woe$Income.level)
+#Confusion Matrix
+tree_cm <- table(test_woe$Income.level, as.numeric(tree_predictprob > 0.5))
+tree_cm
+#Performance objects
+treeperf <- performance(tree_prediction,measure = "tpr", x.measure = "fpr")
+treeauc <- performance(tree_prediction,measure = "auc")@y.values[[1]]
+sprintf("Tree AUC: %s", treeauc)
+treelift <- performance(tree_prediction, measure="lift", x.measure="rpp")
+plot(treelift, main="Lift Curve", colorize=T)
+treeperfdata <- data.frame(FP = treeperf@x.values[[1]], TP = treeperf@y.values[[1]])
+
+```
+# Pruning the tree
+```{r}
+cv_tree <- cv.tree(tree, FUN = prune.misclass)
+par(mfrow = c(1,2))
+plot(cv_tree$size, cv_tree$dev, type = 'b')
+plot(cv_tree$k, cv_tree$dev, type = 'b')
+bestsize <- cv_tree$size[order(cv_tree$dev,decreasing = FALSE)][1]
+message(paste0("best size found to be ", bestsize))
+pruned_tree <- prune.misclass(tree, best = bestsize)
+plot(pruned_tree)
+text(pruned_tree, pretty = 0)
+
+pruned_tree_prediction <- predict(pruned_tree, test_woe, type = "vector")[,2]
+pruned_tree_cm <- table(test_woe$Income.level,as.numeric(pruned_tree_prediction>0.5))
+pruned_tree_cm
+```
+
+# Performance Matrics
+```{r}
+getMetrics <- function(true_classes, predicted_class){
+  confusion_matrix <- table(true_classes,predicted_class)
+  true_neg <- confusion_matrix["0","0"]
+  true_pos <- confusion_matrix["1","1"]
+  false_neg <- confusion_matrix["1","0"]
+  false_pos <- confusion_matrix["0", "1"]
+  misclassification_rate <- mean(predicted_class != true_classes)
+  precision <- true_pos / (true_pos + false_pos)
+  recall <- true_pos / (true_pos + false_neg)
+  return( list("Confusion Matrix" = confusion_matrix,
+            "misclassification" = misclassification_rate, 
+            "precision" = precision, 
+            "recall" = recall))
+}
+```
+```{r}
+list("logistic regression" = getMetrics(test_woe$Income.level,as.numeric(lr_predict > 0.5)))
+list("random forest" = getMetrics(test_woe$Income.level, rf_predict))
+list("boosting" = getMetrics(test_woe$Income.level,as.numeric(xgb_predictprob > 0.5)))
+list("decision tree" = getMetrics(test_woe$Income.level, as.numeric(tree_predictprob > 0.5)))
+```
+#ROC CURVE PLOTTING
+```{r}
+theme_set(theme_grey())
+g <- ggplot() + 
+  geom_line(data = rfperfdata, aes(x = FP, y = TP, color = 'Random Forest')) + 
+  geom_line(data = lrperfdata, aes(x = FP, y = TP, color = 'Logistic Regression')) + 
+  geom_line(data = xgbperfdata, aes(x = FP, y = TP, color = 'XGBoost')) + 
+  geom_line(data = treeperfdata, aes(x = FP, y = TP, color = 'Decision Tree')) +
+  geom_segment(aes(x = 0, xend = 1, y = 0, yend = 1)) +
+  ggtitle('ROC Curve') + 
+  labs(x = 'False Positive Rate', y = 'True Positive Rate')
+g
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
