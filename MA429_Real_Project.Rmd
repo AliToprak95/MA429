@@ -329,6 +329,10 @@ g <- ggplot() +
 g
 ```
 
+#k-nn
+```{r}
+
+```
 
 
 #Dimension Reduction with PCA and SVM
