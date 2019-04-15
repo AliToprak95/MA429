@@ -1,21 +1,24 @@
 ---
-title: "MA429 MOCK PROJECT"
+title: "MA429 REAL PROJECT"
 output: MA429_html_notebook
 ---
 
 ```{r}
 #Download the data from UCI Machine Learning Repository
-test <- read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.test", skip=1, 
-                   sep=",", header = FALSE,
-                   col.names=c("Age", "Workclass", "Fnlwgt","Education","Education-num","Marital-status",
-                               "Occupation","Relationship","Race","Sex",
-                               "Capital-gain","Capital-loss","Hours-per-week","Native-country","Income-level"), na.strings = " ?")
-train <- read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data",
-                    sep=",", header = FALSE,
-                    col.names=c("Age", "Workclass", "Fnlwgt","Education","Education-num","Marital-status",
-                                "Occupation","Relationship","Race","Sex",
-                                "Capital-gain","Capital-loss","Hours-per-week","Native-country","Income-level"), na.strings = " ?")
+#Online Shoppers Purchasing Intention Dataset Data Set
+#Link of the dataset: https://archive.ics.uci.edu/ml/datasets/Online+Shoppers+Purchasing+Intention+Dataset#
 
+#Taking the whole data
+data <- read.csv("online_shoppers_intention.csv")
+
+#Splitting the data into train and test
+set.seed(1881)
+test_indices <- sample(1:nrow(data), 0.3*nrow(data))
+test <- data[test_indices,]
+train <- data[-test_indices,]
+
+#Removing unneccessary instances from working environment
+rm(data, test_indices)
 
 ```
 
