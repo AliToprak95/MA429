@@ -11,6 +11,9 @@ output: MA429_html_notebook
 #Taking the whole data
 data <- read.csv("online_shoppers_intention.csv")
 
+#For the target change logical to numeric
+data$Revenue <- as.factor(as.numeric(data$Revenue))
+
 #Splitting the data into train and test
 set.seed(1881)
 test_indices <- sample(1:nrow(data), 0.3*nrow(data))
@@ -28,6 +31,8 @@ rm(data, test_indices)
 missingnumber <- function(col){sum(is.na(col))}
 missings <- sapply(train, missingnumber)
 missings
+
+
 
 #Structure of train data
 str(train)
@@ -111,7 +116,7 @@ train %>%
 ```{r}
 library(scorecard)
 #Construct the bins
-bins = woebin(train, y="Income.level", positive = "1" )
+bins = woebin(train, y="Revenue", positive = "1" )
 #Show the bins, IV, WOE
 bins
 ```
@@ -126,7 +131,7 @@ test_woe <-woebin_ply(dt = test, bins = bins)
 ```{r}
 library(corrplot)
 
-correlations <- round(cor(train_woe[,c(-1,-13)]),2)
+correlations <- round(cor(train_woe[,-1]),2)
 correlationplot <- corrplot(correlations,type = "upper")
 cordata <- data.frame(correlations)
 correlations
@@ -148,7 +153,7 @@ test_woe <- test_woe[,-c("Fnlwgt_woe","Native.country_woe","Capital.loss_woe","E
 library(ROCR)
 colnames(train_woe)
 start_time <- Sys.time()
-lr <- glm(Income.level ~ ., data = train_woe, family = binomial())
+lr <- glm(Revenue ~ ., data = train_woe, family = binomial())
 end_time <- Sys.time()
 end_time-start_time
 #VIF Check
@@ -159,9 +164,9 @@ steplr <- step(lr,direction = 'both')
 vif(steplr)
 #Prediction
 lr_predict <- predict(steplr,test_woe,type = "response")
-lr_prediction <- prediction(lr_predict, test_woe$Income.level)
+lr_prediction <- prediction(lr_predict, test_woe$Revenue)
 #Confusion Matrix
-lr_confusion_matrix <- table(True_value = test_woe$Income.level, Predict_value = as.numeric(lr_predict > 0.5))
+lr_confusion_matrix <- table(True_value = test_woe$Revenue, Predict_value = as.numeric(lr_predict > 0.5))
 lr_confusion_matrix
 #Performance object
 lrperf <- performance(lr_prediction,measure = "tpr", x.measure = "fpr")
@@ -306,7 +311,7 @@ getMetrics <- function(true_classes, predicted_class){
 }
 ```
 ```{r}
-list("logistic regression" = getMetrics(test_woe$Income.level,as.numeric(lr_predict > 0.5)))
+list("logistic regression" = getMetrics(test_woe$Revenue,as.numeric(lr_predict > 0.5)))
 list("random forest" = getMetrics(test_woe$Income.level, rf_predict))
 list("boosting" = getMetrics(test_woe$Income.level,as.numeric(xgb_predictprob > 0.5)))
 list("decision tree" = getMetrics(test_woe$Income.level, as.numeric(tree_predictprob > 0.5)))
