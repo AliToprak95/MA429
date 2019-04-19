@@ -314,6 +314,7 @@ list("logistic regression" = getMetrics(test_woe$Revenue,as.numeric(lr_predict >
 list("random forest" = getMetrics(test_woe$Income.level, rf_predict))
 list("boosting" = getMetrics(test_woe$Income.level,as.numeric(xgb_predictprob > 0.5)))
 list("decision tree" = getMetrics(test_woe$Income.level, as.numeric(tree_predictprob > 0.5)))
+list("support vector machine" = getMetrics(test_woe$Revenue, as.numeric(attr(svm_predictprob,"probabilities")[,2]>0.5)))
 ```
 #ROC CURVE PLOTTING
 ```{r}
@@ -323,6 +324,7 @@ g <- ggplot() +
   geom_line(data = lrperfdata, aes(x = FP, y = TP, color = 'Logistic Regression')) + 
   geom_line(data = xgbperfdata, aes(x = FP, y = TP, color = 'XGBoost')) + 
   geom_line(data = treeperfdata, aes(x = FP, y = TP, color = 'Decision Tree')) +
+  geom_line(data = svmperfdata, aes(x = FP, y = TP, color = 'Support Vector Machine')) +
   geom_segment(aes(x = 0, xend = 1, y = 0, yend = 1)) +
   ggtitle('ROC Curve') + 
   labs(x = 'False Positive Rate', y = 'True Positive Rate')
@@ -359,9 +361,10 @@ svm_linear <- svm(Revenue ~., data = train_woe, kernel ="linear")
 svm_prediction_lr <- predict(svm_linear, test_woe)
 table(svm_prediction_lr, test_woe$Revenue)
 
-svm_rb <- svm(Revenue ~., data = train_woe, kernel = "radial")
+svm_rb <- svm(Revenue ~., data = train_woe,  kernel = "radial", probability = TRUE)
 svm_prediction_rb <- predict(svm_rb, test_woe)
 table(svm_prediction_rb, test_woe$Revenue)
+svm_predictprob <- predict(svm_rb, test_woe, probability = TRUE)
 svm_rb_prediction <- prediction(tree_predictprob, test_woe$Revenue)
 svmperf <- performance(svm_rb_prediction,measure = "tpr", x.measure = "fpr")
 svmauc <- performance(svm_rb_prediction,measure = "auc")@y.values[[1]]
