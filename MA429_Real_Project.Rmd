@@ -311,9 +311,9 @@ getMetrics <- function(true_classes, predicted_class){
 }
 
 list("logistic regression" = getMetrics(test_woe$Revenue,as.numeric(lr_predict > 0.5)))
-list("random forest" = getMetrics(test_woe$Income.level, rf_predict))
-list("boosting" = getMetrics(test_woe$Income.level,as.numeric(xgb_predictprob > 0.5)))
-list("decision tree" = getMetrics(test_woe$Income.level, as.numeric(tree_predictprob > 0.5)))
+list("random forest" = getMetrics(test_woe$Revenue, rf_predict))
+list("boosting" = getMetrics(test_woe$Revenue,as.numeric(xgb_predictprob > 0.5)))
+list("decision tree" = getMetrics(test_woe$Revenue, as.numeric(tree_predictprob > 0.5)))
 list("support vector machine" = getMetrics(test_woe$Revenue, as.numeric(attr(svm_predictprob,"probabilities")[,2]>0.5)))
 ```
 #ROC CURVE PLOTTING
