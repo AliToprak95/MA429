@@ -160,7 +160,10 @@ end_time-start_time
 vif(lr)
 summary(lr)
 #Stepwise Selection
+start_time <- Sys.time()
 steplr <- step(lr,direction = 'both')
+end_time <- Sys.time()
+end_time-start_time
 vif(steplr)
 #Prediction
 lr_predict <- predict(steplr,test_woe,type = "response")
