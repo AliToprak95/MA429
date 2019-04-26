@@ -139,11 +139,6 @@ correlations
 ```
 
 
-#Feature Elimination according to IV, and correleation
-```{r}
-train_woe <- train_woe[,-c("Fnlwgt_woe","Native.country_woe","Capital.loss_woe","Education_woe")]
-test_woe <- test_woe[,-c("Fnlwgt_woe","Native.country_woe","Capital.loss_woe","Education_woe")]
-```
 
 
 
