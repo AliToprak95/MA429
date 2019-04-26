@@ -218,6 +218,7 @@ library(caret)
 library(xgboost)
 #Cross validation using caret
 trctrl <- trainControl(method = "cv", number = 5, allowParallel = FALSE)
+set.seed(1881)
 start_time <- Sys.time()
 xgb <- train(Revenue ~., data = train_woe, method = "xgbTree",
                 trControl=trctrl)
