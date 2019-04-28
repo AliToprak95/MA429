@@ -328,48 +328,6 @@ g <- ggplot() +
 g
 ```
 
-#k-nn (don't know how to choose k)
-```{r}
-train_x <- train_woe[,-1]
-test_x <- test_woe[,-1]
-train_y <- train_woe[,1]
-test_y <- test_woe[,1]
-knn1_prediction <- knn(train = train_x, test = test_x, cl = train_y$Revenue, k = 1)
-table(knn1_prediction, test_y$Revenue)
-knn2_prediction <- knn(train = train_x, test = test_x, cl = train_y$Revenue, k = 2)
-table(knn2_prediction, test_y$Revenue)
-knn3_prediction <- knn(train = train_x, test = test_x, cl = train_y$Revenue, k = 3)
-table(knn3_prediction, test_y$Revenue)
-knn4_prediction <- knn(train = train_x, test = test_x, cl = train_y$Revenue, k = 4)
-table(knn4_prediction, test_y$Revenue)
-knn5_prediction <- knn(train = train_x, test = test_x, cl = train_y$Revenue, k = 5)
-table(knn5_prediction, test_y$Revenue)
-knn6_prediction <- knn(train = train_x, test = test_x, cl = train_y$Revenue, k = 6)
-table(knn6_prediction, test_y$Revenue)
-knn7_prediction <- knn(train = train_x, test = test_x, cl = train_y$Revenue, k = 7)
-table(knn7_prediction, test_y$Revenue)
-```
-
-
-#Dimension Reduction with PCA and SVM
-```{r}
-library(e1071)
-svm_linear <- svm(Revenue ~., data = train_woe, kernel ="linear")
-svm_prediction_lr <- predict(svm_linear, test_woe)
-table(svm_prediction_lr, test_woe$Revenue)
-
-svm_rb <- svm(Revenue ~., data = train_woe,  kernel = "radial", probability = TRUE)
-svm_prediction_rb <- predict(svm_rb, test_woe)
-table(svm_prediction_rb, test_woe$Revenue)
-svm_predictprob <- predict(svm_rb, test_woe, probability = TRUE)
-svm_rb_prediction <- prediction(tree_predictprob, test_woe$Revenue)
-svmperf <- performance(svm_rb_prediction,measure = "tpr", x.measure = "fpr")
-svmauc <- performance(svm_rb_prediction,measure = "auc")@y.values[[1]]
-sprintf("SVM AUC: %s", svmauc)
-svmlift <- performance(svm_rb_prediction, measure="lift", x.measure="rpp")
-plot(svmlift, main="Lift Curve", colorize=T)
-svmperfdata <- data.frame(FP = svmperf@x.values[[1]], TP = svmperf@y.values[[1]])
-```
 
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
